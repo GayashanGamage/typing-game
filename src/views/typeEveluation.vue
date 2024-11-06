@@ -4,27 +4,21 @@
       <div class="resutl-container-title">
         <h3>Charactors</h3>
         <h3>Words</h3>
-        <h3>Sentence</h3>
       </div>
       <div class="result-container-content">
         <div class="result-content">
-          <p>correct {{ correct }}</p>
-          <p>incorrect {{ incorect }}</p>
+          <p>correct {{ String(correctC).padStart(2, "0") }}</p>
+          <p>incorrect {{ String(incorrectC).padStart(2, "0") }}</p>
         </div>
         <div class="result-content">
-          <p>correct 01</p>
-          <p>incorrect 03</p>
-        </div>
-        <div class="result-content">
-          <p>correct 01</p>
-          <p>incorrect 03</p>
+          <p>correct {{ String(correctW).padStart(2, "0") }}</p>
+          <p>incorrect {{ String(incorrectW).padStart(2, "0") }}</p>
         </div>
       </div>
     </div>
     <hr class="ruler" />
     <p class="paragraph" id="abc">
-      <span class="slct">{{ completeText }}</span
-      >{{ paragraph.join("") }}
+      <span class="slct" v-html="completeText"></span>{{ paragraph.join("") }}
     </p>
     <input
       id="inputBox"
@@ -45,13 +39,15 @@ const paragraphL =
 
 const paragraph = ref(paragraphL.split(""));
 const userInput = ref("");
-const cursorPoint = ref(0);
+const cursorPoint = ref(0); //cursor point of paragraph section
+const completeText = ref(""); //typed charactors
 
-// results
-const correct = ref(0);
-const incorect = ref(0);
+// results sheet
+const correctC = ref(0);
+const incorrectC = ref(0);
+const correctW = ref(0);
+const incorrectW = ref(0);
 
-const completeText = ref("");
 const prohibitedKeys = [
   "Backspace",
   "Tab",
@@ -120,6 +116,7 @@ const checkWord = () => {
 const previoseCorrectness = ref(true);
 
 const typing = (event) => {
+  console.log(cursorPoint.value, event.key, previoseCorrectness.value);
   // put front cursor always
   let inputBox = document.getElementById("inputBox");
   inputBox.setSelectionRange(-1, -1);
@@ -127,23 +124,52 @@ const typing = (event) => {
   // prevent backspace and deletekey to remove text from user input
   if (event.key == "Backspace" || event.key == "Delete") {
     event.preventDefault();
-  } else if (!prohibitedKeys.includes(event.key)) {
+  }
+
+  // if event key is not prohibited, then
+  else if (!prohibitedKeys.includes(event.key)) {
+    // if previouse is correct and current is correct
     if (
       paragraph.value[cursorPoint.value] === event.key &&
       previoseCorrectness.value == true
     ) {
-      correct.value += 1;
+      console.log("one");
       let removeitem = paragraph.value.shift();
       completeText.value += removeitem;
+      correctC.value += 1;
     }
-    // if priviose value is false, then correct score not added
-    else if (paragraph.value[cursorPoint.value] === event.key) {
+    // else previose is incorect, but this is correct
+    else if (
+      paragraph.value[cursorPoint.value] === event.key &&
+      previoseCorrectness.value === false
+    ) {
+      console.log("four");
+      previoseCorrectness.value = true;
       let removeitem = paragraph.value.shift();
       completeText.value += removeitem;
-      previoseCorrectness.value = true;
-    } else {
+      correctC.value += 1;
+    }
+    // else previose is correct, but this is incorect
+    else if (
+      paragraph.value[cursorPoint.value] !== event.key &&
+      previoseCorrectness.value === true
+    ) {
+      console.log("two");
+      let removeitem = paragraph.value.shift();
+      completeText.value += '<span class= "error">' + removeitem + "</span>";
       previoseCorrectness.value = false;
-      incorect.value += 1;
+      incorrectC.value += 1;
+    }
+    // else previose and this is also incorect
+    else if (
+      paragraph.value[cursorPoint.value] !== event.key &&
+      previoseCorrectness.value == false
+    ) {
+      console.log("three");
+      let removeitem = paragraph.value.shift();
+      completeText.value = completeText.value.slice(0, -7);
+      completeText.value += removeitem + "</span>";
+      incorrectC.value += 1;
     }
   }
 };
@@ -202,10 +228,15 @@ const changeCursor = () => {
 </style>
 
 <style>
+.error {
+  /* background-color: red; */
+  border-radius: 6px;
+  color: red;
+}
 .slct {
-  color: white;
+  /* color: white; */
   font-weight: 600;
-  background-color: rgba(53, 204, 108, 9);
+  background-color: rgba(53, 204, 108, 0.6);
   border-radius: 4px;
   /* padding: 0px 4px; */
 }
