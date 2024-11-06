@@ -1,3 +1,4 @@
+import result from "@/views/result.vue";
 import TypeEveluation from "@/views/typeEveluation.vue";
 import { createRouter, createWebHistory } from "vue-router";
 
@@ -8,6 +9,11 @@ const router = createRouter({
       path: "/eveluation",
       component: TypeEveluation,
       name: "typeEveluation",
+    },
+    {
+      path: "/result",
+      component: result,
+      name: "result",
     },
   ],
 });

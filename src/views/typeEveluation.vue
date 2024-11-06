@@ -1,5 +1,10 @@
 <template>
   <div class="level-one-container">
+    <div class="timer-container">
+      <p>
+        <span class="timer">{{ String(timer).padStart(2, "0") }}</span> seconds
+      </p>
+    </div>
     <div class="result-container">
       <div class="resutl-container-title">
         <h3>Charactors</h3>
@@ -32,6 +37,7 @@
 </template>
 
 <script setup>
+import router from "@/router";
 import { onMounted, ref } from "vue";
 
 const paragraphL =
@@ -49,6 +55,10 @@ const correctC = ref(0);
 const incorrectC = ref(0);
 const correctW = ref(0);
 const incorrectW = ref(0);
+
+// timmer
+const isTimmerRun = ref(false);
+const timer = ref(25);
 
 const prohibitedKeys = [
   "Backspace",
@@ -138,6 +148,13 @@ const typing = (event) => {
     event.preventDefault();
   }
 
+  // console.log(runTimer.value);
+  // start timmer
+  if (isTimmerRun.value === false) {
+    isTimmerRun.value = true;
+    startTimer();
+  }
+
   // if event key is not prohibited, then
   else if (!prohibitedKeys.includes(event.key)) {
     checkWord(event.key, paragraph.value[cursorPoint.value]);
@@ -183,6 +200,14 @@ const typing = (event) => {
   }
 };
 
+const startTimer = () => {
+  setInterval(function () {
+    if (timer.value === 1) {
+      router.push({ name: "result" });
+    }
+    timer.value -= 1;
+  }, 1000);
+};
 // this is for prevent input box cursor movement
 const changeCursor = () => {
   let inputBox = document.getElementById("inputBox");
@@ -229,6 +254,19 @@ const changeCursor = () => {
 }
 .ruler {
   width: 700px;
+}
+.timer-container {
+  font-family: "Roboto Mono", serif;
+  width: 700px;
+}
+.timer {
+  font-size: 25px;
+  font-family: "Roboto Mono", serif;
+  font-weight: 900;
+  background-color: black;
+  color: white;
+  padding: 10px;
+  border-radius: 50px;
 }
 </style>
 
