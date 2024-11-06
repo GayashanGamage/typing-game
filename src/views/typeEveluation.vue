@@ -41,6 +41,8 @@ const paragraph = ref(paragraphL.split(""));
 const userInput = ref("");
 const cursorPoint = ref(0); //cursor point of paragraph section
 const completeText = ref(""); //typed charactors
+const previoseCorrectness = ref(true); // correctness of the previose charactor
+const wordCorrectness = ref(true); //status of the current word ( whether it's correct or not )
 
 // results sheet
 const correctC = ref(0);
@@ -92,15 +94,6 @@ const prohibitedKeys = [
   "LaunchApplication2",
 ];
 
-onMounted(() => {
-  // paragraph.innerHTML =
-  //   paragraph.innerHTML.slice(0, 8) +
-  //   " <span class='slct'> " +
-  //   paragraph.innerHTML.slice(12, 19) +
-  //   "</span>" +
-  //   paragraph.innerHTML.slice(19, 33);
-});
-
 const checkSentence = () => {};
 
 const wordCounter = ref({
@@ -108,18 +101,37 @@ const wordCounter = ref({
   correct: true,
 });
 
-const checkWord = () => {
-  if (wordCounter.value.correct === true) {
+const checkWord = (userInput, paragraphInput) => {
+  if (
+    userInput === paragraphInput &&
+    paragraphInput === " " &&
+    wordCorrectness.value == true
+  ) {
+    correctW.value += 1;
+  } else if (
+    userInput === paragraphInput &&
+    paragraphInput === " " &&
+    wordCorrectness.value == false
+  ) {
+    wordCorrectness.value = true;
+  } else if (
+    userInput != paragraphInput &&
+    paragraphInput != " " &&
+    wordCorrectness.value == true
+  ) {
+    incorrectW.value += 1;
+    wordCorrectness.value = false;
+  } else if (userInput != paragraphInput && paragraphInput == " ") {
+    wordCorrectness.value = true;
   }
 };
 
-const previoseCorrectness = ref(true);
-
 const typing = (event) => {
-  console.log(cursorPoint.value, event.key, previoseCorrectness.value);
   // put front cursor always
   let inputBox = document.getElementById("inputBox");
   inputBox.setSelectionRange(-1, -1);
+
+  // check word correctness
 
   // prevent backspace and deletekey to remove text from user input
   if (event.key == "Backspace" || event.key == "Delete") {
@@ -128,12 +140,12 @@ const typing = (event) => {
 
   // if event key is not prohibited, then
   else if (!prohibitedKeys.includes(event.key)) {
+    checkWord(event.key, paragraph.value[cursorPoint.value]);
     // if previouse is correct and current is correct
     if (
       paragraph.value[cursorPoint.value] === event.key &&
       previoseCorrectness.value == true
     ) {
-      console.log("one");
       let removeitem = paragraph.value.shift();
       completeText.value += removeitem;
       correctC.value += 1;
@@ -143,7 +155,6 @@ const typing = (event) => {
       paragraph.value[cursorPoint.value] === event.key &&
       previoseCorrectness.value === false
     ) {
-      console.log("four");
       previoseCorrectness.value = true;
       let removeitem = paragraph.value.shift();
       completeText.value += removeitem;
@@ -154,7 +165,6 @@ const typing = (event) => {
       paragraph.value[cursorPoint.value] !== event.key &&
       previoseCorrectness.value === true
     ) {
-      console.log("two");
       let removeitem = paragraph.value.shift();
       completeText.value += '<span class= "error">' + removeitem + "</span>";
       previoseCorrectness.value = false;
@@ -165,7 +175,6 @@ const typing = (event) => {
       paragraph.value[cursorPoint.value] !== event.key &&
       previoseCorrectness.value == false
     ) {
-      console.log("three");
       let removeitem = paragraph.value.shift();
       completeText.value = completeText.value.slice(0, -7);
       completeText.value += removeitem + "</span>";
@@ -201,23 +210,19 @@ const changeCursor = () => {
   font-size: 25px;
   outline: none;
   padding: 10px;
-  /* caret-color: transparent; */
 }
 .result-container {
-  /* border: 1px solid black; */
   width: 700px;
   display: flex;
   flex-direction: column;
 }
 .resutl-container-title {
-  /* border: 1px solid yellow; */
   display: flex;
   justify-content: space-around;
   font-family: "Roboto Mono", serif;
   font-weight: 600;
 }
 .result-container-content {
-  /* border: 1px solid red; */
   display: flex;
   justify-content: space-around;
   font-family: "Roboto Mono", serif;
@@ -229,15 +234,12 @@ const changeCursor = () => {
 
 <style>
 .error {
-  /* background-color: red; */
   border-radius: 6px;
-  color: red;
+  color: #f95454;
 }
 .slct {
-  /* color: white; */
   font-weight: 600;
   background-color: rgba(53, 204, 108, 0.6);
   border-radius: 4px;
-  /* padding: 0px 4px; */
 }
 </style>
