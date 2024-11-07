@@ -1,5 +1,11 @@
 <template>
-  <div class="level-one-container">
+  <div
+    class="level-one-container"
+    @keydown="typing"
+    tabindex="0"
+    @focusout="showPopup"
+    id="mainwindow"
+  >
     <div class="timer-container">
       <p>
         <span class="timer">{{ String(timer).padStart(2, "0") }}</span> seconds
@@ -25,23 +31,25 @@
     <p class="paragraph" id="abc">
       <span class="slct" v-html="completeText"></span>{{ paragraph.join("") }}
     </p>
-    <input
-      id="inputBox"
-      type="text"
-      class="userInput"
-      @keydown="typing"
-      @click="changeCursor"
-      v-model="userInput"
-    />
+    <div class="popup" v-show="popup">
+      <div class="popup-message">
+        <p class="info">Just type this shit & find your performance</p>
+        <button class="popup-button" @click="focusOnEditor">LET'S START</button>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import router from "@/router";
-import { onMounted, ref } from "vue";
+import { onBeforeMount, onMounted, ref } from "vue";
+
+onMounted(() => {
+  document.getElementById("mainwindow").focus();
+});
 
 const paragraphL =
-  "The sun was shining brightly over the small town. People were busy with their daily routines, moving quickly along the streets. Children were laughing and playing in the park. Birds chirped from the trees, adding a cheerful melody to the scene.";
+  "In Par1s, the s!ghts are endless. V1ewsof EiffelT7@wer, cafes%4filled with warm^breads, and7S$hops l!ned with chic+gems! You'll find F@ash!ons that sparkle, nights that$sh!mmer, and the S3ene rivers!de flowing so5<calmly. Explore streets l@ike Rue5Saint and wond9er @t5the art galler!es. Every m&oment br!ngs a nEw,_journey! Caf@es call<, art$grows, and mus!c f1lls the air. Walk the b@oad$R5des and see l!ght danc1ng on the old+facad3s. Here, love and h!story blend with e@very st3p taken, a tr!p to ch@rm the so3ul and br!ghten each dr~eam.";
 
 const paragraph = ref(paragraphL.split(""));
 const userInput = ref("");
@@ -58,7 +66,10 @@ const incorrectW = ref(0);
 
 // timmer
 const isTimmerRun = ref(false);
-const timer = ref(25);
+const timer = ref(0);
+
+// focuse out popup
+const popup = ref(false);
 
 const prohibitedKeys = [
   "Backspace",
@@ -137,12 +148,6 @@ const checkWord = (userInput, paragraphInput) => {
 };
 
 const typing = (event) => {
-  // put front cursor always
-  let inputBox = document.getElementById("inputBox");
-  inputBox.setSelectionRange(-1, -1);
-
-  // check word correctness
-
   // prevent backspace and deletekey to remove text from user input
   if (event.key == "Backspace" || event.key == "Delete") {
     event.preventDefault();
@@ -201,22 +206,31 @@ const typing = (event) => {
 };
 
 const startTimer = () => {
-  setInterval(function () {
-    if (timer.value === 1) {
-      router.push({ name: "result" });
+  setInterval(() => {
+    if (timer.value === 300 || popup.value === true) {
+      clearInterval(startTimer);
     }
-    timer.value -= 1;
+    timer.value++;
   }, 1000);
 };
-// this is for prevent input box cursor movement
-const changeCursor = () => {
-  let inputBox = document.getElementById("inputBox");
-  inputBox.setSelectionRange(-1, -1);
+
+const showPopup = () => {
+  popup.value = true;
+};
+
+const focusOnEditor = () => {
+  document.getElementById("mainwindow").focus();
+  popup.value = false;
 };
 </script>
 
 <style scoped>
 .level-one-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   height: 100vh;
   width: 100vw;
   display: flex;
@@ -228,6 +242,7 @@ const changeCursor = () => {
   font-family: "Roboto Mono", monospace;
   font-size: 25px;
   width: 700px;
+  user-select: none;
 }
 .userInput {
   width: 675px;
@@ -235,6 +250,8 @@ const changeCursor = () => {
   font-size: 25px;
   outline: none;
   padding: 10px;
+  /* display: none; */
+  visibility: hidden;
 }
 .result-container {
   width: 700px;
@@ -267,6 +284,50 @@ const changeCursor = () => {
   color: white;
   padding: 10px;
   border-radius: 50px;
+}
+.popup {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.popup-message {
+  width: 500px;
+  height: 250px;
+  background-color: aliceblue;
+  border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+.info {
+  font-family: "Roboto Mono", serif;
+  font-size: 24px;
+  font-weight: 900;
+  text-align: center;
+}
+.popup-button {
+  font-family: "Roboto Mono", serif;
+  font-weight: 900;
+  font-size: 20px;
+  width: fit-content;
+  height: fit-content;
+  padding: 5px 20px;
+  color: aliceblue;
+  background-color: black;
+  border-radius: 4px;
+  border: 0px;
+}
+.popup-button:hover {
+  background-color: aliceblue;
+  color: black;
+  border: 3px solid black;
 }
 </style>
 

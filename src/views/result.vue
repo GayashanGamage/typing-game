@@ -14,8 +14,9 @@
   height: 100vh;
 }
 .page-title {
+  font-family: "Roboto Mono", monospace;
   font-size: 25px;
-  font-family: "Roboto Mono", serif;
-  font-weight: 900;
+  width: 700px;
+  text-align: center;
 }
 </style>
