@@ -8,7 +8,10 @@
   >
     <div class="timer-container">
       <p>
-        <span class="timer">{{ String(timer).padStart(2, "0") }}</span> seconds
+        <span class="timer">{{
+          String(eveluationStore.timer).padStart(2, "0")
+        }}</span>
+        seconds
       </p>
     </div>
     <div class="result-container">
@@ -18,20 +21,25 @@
       </div>
       <div class="result-container-content">
         <div class="result-content">
-          <p>correct {{ String(correctC).padStart(2, "0") }}</p>
-          <p>incorrect {{ String(incorrectC).padStart(2, "0") }}</p>
+          <p>correct {{ String(eveluationStore.correctC).padStart(2, "0") }}</p>
+          <p>
+            incorrect {{ String(eveluationStore.incorrectC).padStart(2, "0") }}
+          </p>
         </div>
         <div class="result-content">
-          <p>correct {{ String(correctW).padStart(2, "0") }}</p>
-          <p>incorrect {{ String(incorrectW).padStart(2, "0") }}</p>
+          <p>correct {{ String(eveluationStore.correctW).padStart(2, "0") }}</p>
+          <p>
+            incorrect {{ String(eveluationStore.incorrectW).padStart(2, "0") }}
+          </p>
         </div>
       </div>
     </div>
     <hr class="ruler" />
     <p class="paragraph" id="abc">
-      <span class="slct" v-html="completeText"></span>{{ paragraph.join("") }}
+      <span class="slct" v-html="eveluationStore.completeText"></span
+      >{{ eveluationStore.paragraph.join("") }}
     </p>
-    <div class="popup" v-show="popup">
+    <div class="popup" v-show="eveluationStore.popup">
       <div class="popup-message">
         <p class="info">Just type this shit & find your performance</p>
         <button class="popup-button" @click="focusOnEditor">LET'S START</button>
@@ -41,109 +49,37 @@
 </template>
 
 <script setup>
-import router from "@/router";
-import { onBeforeMount, onMounted, ref } from "vue";
+import { useEveluationStore } from "@/stores/eveluation";
+import { onMounted, ref } from "vue";
+
+const eveluationStore = useEveluationStore();
 
 onMounted(() => {
   document.getElementById("mainwindow").focus();
-});
-
-const paragraphL =
-  "In Par1s, the s!ghts are endless. V1ewsof EiffelT7@wer, cafes%4filled with warm^breads, and7S$hops l!ned with chic+gems! You'll find F@ash!ons that sparkle, nights that$sh!mmer, and the S3ene rivers!de flowing so5<calmly. Explore streets l@ike Rue5Saint and wond9er @t5the art galler!es. Every m&oment br!ngs a nEw,_journey! Caf@es call<, art$grows, and mus!c f1lls the air. Walk the b@oad$R5des and see l!ght danc1ng on the old+facad3s. Here, love and h!story blend with e@very st3p taken, a tr!p to ch@rm the so3ul and br!ghten each dr~eam.";
-
-const paragraph = ref(paragraphL.split(""));
-const userInput = ref("");
-const cursorPoint = ref(0); //cursor point of paragraph section
-const completeText = ref(""); //typed charactors
-const previoseCorrectness = ref(true); // correctness of the previose charactor
-const wordCorrectness = ref(true); //status of the current word ( whether it's correct or not )
-
-// results sheet
-const correctC = ref(0);
-const incorrectC = ref(0);
-const correctW = ref(0);
-const incorrectW = ref(0);
-
-// timmer
-const isTimmerRun = ref(false);
-const timer = ref(0);
-
-// focuse out popup
-const popup = ref(false);
-
-const prohibitedKeys = [
-  "Backspace",
-  "Tab",
-  "Enter",
-  "Shift",
-  "Control",
-  "Alt",
-  "Pause",
-  "CapsLock",
-  "Escape",
-  "PageUp",
-  "PageDown",
-  "End",
-  "Home",
-  "ArrowLeft",
-  "ArrowUp",
-  "ArrowRight",
-  "ArrowDown",
-  "PrintScreen",
-  "Insert",
-  "Delete",
-  "Meta",
-  "ContextMenu",
-  "F1",
-  "F2",
-  "F3",
-  "F4",
-  "F5",
-  "F6",
-  "F7",
-  "F8",
-  "F9",
-  "F10",
-  "F11",
-  "F12",
-  "ScrollLock",
-  "AudioVolumeMute",
-  "AudioVolumeDown",
-  "AudioVolumeUp",
-  "LaunchMediaPlayer",
-  "LaunchApplication1",
-  "LaunchApplication2",
-];
-
-const checkSentence = () => {};
-
-const wordCounter = ref({
-  counter: 0,
-  correct: true,
 });
 
 const checkWord = (userInput, paragraphInput) => {
   if (
     userInput === paragraphInput &&
     paragraphInput === " " &&
-    wordCorrectness.value == true
+    eveluationStore.wordCorrectness == true
   ) {
-    correctW.value += 1;
+    eveluationStore.correctW += 1;
   } else if (
     userInput === paragraphInput &&
     paragraphInput === " " &&
-    wordCorrectness.value == false
+    eveluationStore.wordCorrectness == false
   ) {
-    wordCorrectness.value = true;
+    eveluationStore.wordCorrectness = true;
   } else if (
     userInput != paragraphInput &&
     paragraphInput != " " &&
-    wordCorrectness.value == true
+    eveluationStore.wordCorrectness == true
   ) {
-    incorrectW.value += 1;
-    wordCorrectness.value = false;
+    eveluationStore.incorrectW += 1;
+    eveluationStore.wordCorrectness = false;
   } else if (userInput != paragraphInput && paragraphInput == " ") {
-    wordCorrectness.value = true;
+    eveluationStore.wordCorrectness = true;
   }
 };
 
@@ -155,72 +91,76 @@ const typing = (event) => {
 
   // console.log(runTimer.value);
   // start timmer
-  if (isTimmerRun.value === false) {
-    isTimmerRun.value = true;
+  if (eveluationStore.isTimmerRun === false) {
+    eveluationStore.isTimmerRun = true;
     startTimer();
   }
 
   // if event key is not prohibited, then
-  else if (!prohibitedKeys.includes(event.key)) {
-    checkWord(event.key, paragraph.value[cursorPoint.value]);
+  else if (!eveluationStore.prohibitedKeys.includes(event.key)) {
+    checkWord(
+      event.key,
+      eveluationStore.paragraph[eveluationStore.cursorPoint]
+    );
     // if previouse is correct and current is correct
     if (
-      paragraph.value[cursorPoint.value] === event.key &&
-      previoseCorrectness.value == true
+      eveluationStore.paragraph[eveluationStore.cursorPoint] === event.key &&
+      eveluationStore.previoseCorrectness == true
     ) {
-      let removeitem = paragraph.value.shift();
-      completeText.value += removeitem;
-      correctC.value += 1;
+      let removeitem = eveluationStore.paragraph.shift();
+      eveluationStore.completeText += removeitem;
+      eveluationStore.correctC += 1;
     }
     // else previose is incorect, but this is correct
     else if (
-      paragraph.value[cursorPoint.value] === event.key &&
-      previoseCorrectness.value === false
+      eveluationStore.paragraph[eveluationStore.cursorPoint] === event.key &&
+      eveluationStore.previoseCorrectness === false
     ) {
-      previoseCorrectness.value = true;
-      let removeitem = paragraph.value.shift();
-      completeText.value += removeitem;
-      correctC.value += 1;
+      eveluationStore.previoseCorrectness = true;
+      let removeitem = eveluationStore.paragraph.shift();
+      eveluationStore.completeText += removeitem;
+      eveluationStore.correctC += 1;
     }
     // else previose is correct, but this is incorect
     else if (
-      paragraph.value[cursorPoint.value] !== event.key &&
-      previoseCorrectness.value === true
+      eveluationStore.paragraph[eveluationStore.cursorPoint] !== event.key &&
+      eveluationStore.previoseCorrectness === true
     ) {
-      let removeitem = paragraph.value.shift();
-      completeText.value += '<span class= "error">' + removeitem + "</span>";
-      previoseCorrectness.value = false;
-      incorrectC.value += 1;
+      let removeitem = eveluationStore.paragraph.shift();
+      eveluationStore.completeText +=
+        '<span class= "error">' + removeitem + "</span>";
+      eveluationStore.previoseCorrectness = false;
+      eveluationStore.incorrectC += 1;
     }
     // else previose and this is also incorect
     else if (
-      paragraph.value[cursorPoint.value] !== event.key &&
-      previoseCorrectness.value == false
+      eveluationStore.paragraph[eveluationStore.cursorPoint] !== event.key &&
+      eveluationStore.previoseCorrectness == false
     ) {
-      let removeitem = paragraph.value.shift();
-      completeText.value = completeText.value.slice(0, -7);
-      completeText.value += removeitem + "</span>";
-      incorrectC.value += 1;
+      let removeitem = eveluationStore.paragraph.shift();
+      eveluationStore.completeText = eveluationStore.completeText.slice(0, -7);
+      eveluationStore.completeText += removeitem + "</span>";
+      eveluationStore.incorrectC += 1;
     }
   }
 };
 
 const startTimer = () => {
   setInterval(() => {
-    if (timer.value === 300 || popup.value === true) {
+    if (eveluationStore.timer === 300 || eveluationStore.popup === true) {
       clearInterval(startTimer);
     }
-    timer.value++;
+    eveluationStore.timer++;
   }, 1000);
 };
 
 const showPopup = () => {
-  popup.value = true;
+  eveluationStore.popup = true;
 };
 
 const focusOnEditor = () => {
   document.getElementById("mainwindow").focus();
-  popup.value = false;
+  eveluationStore.popup = false;
 };
 </script>
 
