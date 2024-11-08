@@ -9,11 +9,11 @@
       </h1>
       <input type="text" class="user-input" placeholder="PREFFERENCE TOPIC" />
       <div class="level-three-container buttons">
-        <button class="action-button" @click="getEveluation">
+        <button class="action-button" @click="getEveluation(60)">
           <span class="button-number">01</span
           ><span class="button-text">minutes</span>
         </button>
-        <button class="action-button" @click="getEveluation">
+        <button class="action-button" @click="getEveluation(180)">
           <span class="button-number">03</span
           ><span class="button-text">minutes</span>
         </button>
@@ -27,8 +27,12 @@
 
 <script setup>
 import router from "@/router";
+import { useEveluationStore } from "@/stores/eveluation";
 
-const getEveluation = () => {
+const eveluationStore = useEveluationStore();
+
+const getEveluation = (duration) => {
+  eveluationStore.timer = duration;
   router.push({ name: "eveluation" });
 };
 </script>

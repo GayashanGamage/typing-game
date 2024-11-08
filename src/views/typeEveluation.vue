@@ -49,6 +49,7 @@
 </template>
 
 <script setup>
+import router from "@/router";
 import { useEveluationStore } from "@/stores/eveluation";
 import { onMounted, ref } from "vue";
 
@@ -147,10 +148,13 @@ const typing = (event) => {
 
 const startTimer = () => {
   setInterval(() => {
-    if (eveluationStore.timer === 300 || eveluationStore.popup === true) {
+    if (eveluationStore.timer <= 0) {
+      clearInterval(startTimer);
+      router.push({ name: "result" });
+    } else if (eveluationStore.popup === true) {
       clearInterval(startTimer);
     }
-    eveluationStore.timer++;
+    eveluationStore.timer--;
   }, 1000);
 };
 
